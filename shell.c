@@ -2,7 +2,6 @@
 
 #define MAX_COMMAND_LENGTH 100
 
-//Display shell prompt
 void display_prompt() {
     printf("simple_shell$ ");
 }
@@ -62,6 +61,13 @@ int execute_command(char *command) {
 
     return 0;
 }
+/**
+ * main - entry point of the program
+ * @command_length: number of values received from the command line
+ * @command: buffer for memory allocation
+ * display_prompt - Display the prompt
+ * Return: zero on succes.
+ */
 int main()
 {
     size_t command_length = 0;
