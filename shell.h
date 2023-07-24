@@ -37,14 +37,15 @@ typedef struct info
 	char **env;
 	char **alias_list;
 }
-//Data of the program; to be updated.
+
+/*Data of the program; to be updated*/
 
 /************* MAIN FUNCTIONS *************/
 
 
 /*========  shell.c  ========*/
 /*Display shell prompt */
-void display_prompt()
+void display_prompt(void)
 int execute_command(char *command)
 pid_t pid = fork()
 
