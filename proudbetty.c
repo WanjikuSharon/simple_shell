@@ -2,7 +2,7 @@
 
 /**
  * main - Entry Point
- * Our making proud betty c program
+ * Our making proud betty C program
  * Return: 0 (success)
  */
 
