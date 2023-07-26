@@ -1,134 +1,90 @@
 #include "shell.h"
 
-#define MAX_COMMAND_LENGTH 100
-
 /**
- * display_prompt - display the prompt
- * execute_command - Execute user input
- * @data: pointer to the structure of data
- * @args: number of arguments pased to the program execution
- * @token: variable for tokens available in string
- * fork - create child process
- * perror - handle errors
- * execve - command execution
- * perror - handle errors
+ * main - Simple Shell (Hsh)
+ * @argc: Argument Count
+ * @argv:Argument Value
+ * Return: Exit Value By Status
  */
 
-void display_prompt(void)
+int main(__attribute__((unused)) int argc, char **argv)
 {
-	printf("simple_shell$ ");
-}
+	char *input, **cmd;
+	int counter = 0, statue = 1, st = 0;
 
-int execute_command(char *command)
-{
-	char *args[MAX_COMMAND_LENGTH];
-	char *token;
-	int i = 0;
-
-	token = strtok(command, " ");
-	while (token != NULL && i < MAX_COMMAND_LENGTH - 1)
+	if (argv[1] != NULL)
+		read_file(argv[1], argv);
+	signal(SIGINT, signal_to_handel);
+	while (statue)
 	{
-		args[i] = token;
-		i++;
-		token = strtok(NULL, " ");
-	}
-	args[i] = NULL;
-
-	pid_t pid = fork();
-
-	if (pid < 0)
-	{
-		perror("Fork error");
-		return (-1);
-	}
-	else if (pid == 0)
-	{
-		if (execve(args[0], args, NULL) == -1)
+		counter++;
+		if (isatty(STDIN_FILENO))
+			prompt();
+		input = _getline();
+		if (input[0] == '\0')
 		{
-			perror("Command execution error");
-			return (-1);
+			continue;
 		}
-	}
-	}
-	else
-	{
+		history(input);
+		cmd = parse_cmd(input);
+		if (_strcmp(cmd[0], "exit") == 0)
+		{
+			exit_bul(cmd, input, argv, counter);
+		}
+		else if (check_builtin(cmd) == 0)
+		{
+			st = handle_builtin(cmd, st);
+			free_all(cmd, input);
+			continue;
+		}
+		else
+		{
+			st = check_cmd(cmd, input, counter, argv);
 
-	int status;
-
-	if (waitpid(pid, &status, 0) == -1)
-	{
-		perror("Waitpid error");
-		return (-1);
+		}
+		free_all(cmd, input);
 	}
-
-	if (WIFEXITED(status))
-	{
-		return (WEXITSTATUS(status));
-	}
-	else if (WIFSIGNALED(status))
-	{
-		printf("Command terminated with signal %d\n", WTERMSIG(status));
-		return (-1);
-	}
-	}
-
-	return (0);
+	return (statue);
 }
-
 /**
- * main - entry point of the program
- * @command_length: number of values received from the command line
- * @command: buffer for memory allocation
- * display_prompt - Display the prompt
- * Return: zero on succes.
- * getline - Read user input
+ * check_builtin - check builtin
+ *
+ * @cmd:command to check
+ * Return: 0 Succes -1 Fail
  */
-
-int main(void)
+int check_builtin(char **cmd)
 {
-	size_t command_length = 0;
-	char *command = NULL; /*Buffer memory*/
-
-	while (1)
+	bul_t fun[] = {
+		{"cd", NULL},
+		{"help", NULL},
+		{"echo", NULL},
+		{"history", NULL},
+		{NULL, NULL}
+	};
+	int i = 0;
+		if (*cmd == NULL)
 	{
-		display_prompt();
+		return (-1);
 	}
-	/*Read user input using getline*/
 
-	if (getline(&command, &command_length, stdin) == -1)
+	while ((fun + i)->command)
 	{
-	/*Handle end of file (Ctrl+D)*/
-		printf("\n");
-		break;
+		if (_strcmp(cmd[0], (fun + i)->command) == 0)
+			return (0);
+		i++;
 	}
-	command[strcspn(command, "\n")] = '\0';
+	return (-1);
+}
+/**
+ * creat_envi - Creat Array of Enviroment Variable
+ * @envi: Array of Enviroment Variable
+ * Return: Void
+ */
+void creat_envi(char **envi)
+{
+	int i;
 
-	int result = execute_command(command);
-
-	if (result != 0)
-	{
-		printf("Command execution failed.\n");
-	}
-
-	free(command);
-	command = NULL;
-	command_length = 0;
-
-	}
-	return (0);
-	}
-
-	int result = execute_command(command);
-
-	if (result != 0)
-	{
-		printf("Command execution failed.\n");
-	}
-
-	free(command);
-	command = NULL;
-	command_length = 0;
-	}
-
-	return (0);
+	for (i = 0; environ[i]; i++)
+		envi[i] = _strdup(environ[i]);
+	envi[i] = NULL;
 }
